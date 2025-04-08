@@ -2,8 +2,10 @@
 import { pipeline, env } from "@huggingface/transformers";
 import { VehicleData } from "@/types/traffic";
 
-// Enable WebGPU if available for better performance
-env.setBackend('webgpu');
+// For manual model configuration - the proper way to set backends
+// env.backends is the correct property, not setBackend
+// You can modify this line to choose the backend: 'webgl', 'wasm', or 'webgpu'
+env.backends = ['webgpu', 'webgl', 'wasm'];
 
 // Model types and configurations
 export type ModelType = "yolo" | "audio";
@@ -15,6 +17,7 @@ export interface ModelConfig {
 }
 
 // YOLOv5 model configuration (using ONNX model from Hugging Face)
+// You can manually update this path to your preferred YOLO model
 export const yoloConfig: ModelConfig = {
   modelPath: "onnx-community/yolov5s",
   inputShape: [1, 3, 640, 640],
@@ -22,6 +25,7 @@ export const yoloConfig: ModelConfig = {
 };
 
 // Audio classification model configuration
+// You can manually update this path to your preferred audio classification model
 export const audioConfig: ModelConfig = {
   modelPath: "onnx-community/audio-classification",
   inputShape: [1, 1, 44100], // 1 second of audio at 44.1kHz
@@ -33,6 +37,7 @@ let yoloModel: any = null;
 let audioModel: any = null;
 
 // Load the YOLOv5 model
+// You can manually call this function to preload the model at startup
 export const loadYoloModel = async () => {
   try {
     if (!yoloModel) {
@@ -48,6 +53,7 @@ export const loadYoloModel = async () => {
 };
 
 // Load the audio classification model
+// You can manually call this function to preload the model at startup
 export const loadAudioModel = async () => {
   try {
     if (!audioModel) {
