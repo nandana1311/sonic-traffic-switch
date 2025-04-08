@@ -15,3 +15,9 @@ export interface ModelResult {
   vehicleData: VehicleData;
   hasEmergency: boolean;
 }
+
+export interface ModelStatus {
+  yolo: "idle" | "loading" | "running" | "error";
+  audio: "idle" | "loading" | "running" | "error";
+  error?: string;
+}
