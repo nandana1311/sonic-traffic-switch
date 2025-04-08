@@ -2,10 +2,8 @@
 import { pipeline, env } from "@huggingface/transformers";
 import { VehicleData } from "@/types/traffic";
 
-// For manual model configuration - the proper way to set backends
-// env.backends is the correct property, not setBackend
-// You can modify this line to choose the backend: 'webgl', 'wasm', or 'webgpu'
-env.backends = ['webgpu', 'webgl', 'wasm'];
+// Configure backends with correct type
+env.backends = { onnx: { preferredBackend: 'webgpu', fallbackBackends: ['webgl', 'wasm'] } };
 
 // Model types and configurations
 export type ModelType = "yolo" | "audio";
@@ -16,18 +14,20 @@ export interface ModelConfig {
   threshold: number;
 }
 
-// YOLOv5 model configuration (using ONNX model from Hugging Face)
-// You can manually update this path to your preferred YOLO model
+// YOLOv5 model configuration
+// Replace this URL with your GitHub raw model file URL
+// Example: https://raw.githubusercontent.com/yourusername/yourrepo/main/models/yolov5s.onnx
 export const yoloConfig: ModelConfig = {
-  modelPath: "onnx-community/yolov5s",
+  modelPath: "onnx-community/yolov5s", // Replace with your GitHub URL
   inputShape: [1, 3, 640, 640],
   threshold: 0.5,
 };
 
 // Audio classification model configuration
-// You can manually update this path to your preferred audio classification model
+// Replace this URL with your GitHub raw model file URL
+// Example: https://raw.githubusercontent.com/yourusername/yourrepo/main/models/audio-model.onnx
 export const audioConfig: ModelConfig = {
-  modelPath: "onnx-community/audio-classification",
+  modelPath: "onnx-community/audio-classification", // Replace with your GitHub URL
   inputShape: [1, 1, 44100], // 1 second of audio at 44.1kHz
   threshold: 0.7,
 };
@@ -42,7 +42,21 @@ export const loadYoloModel = async () => {
   try {
     if (!yoloModel) {
       console.log("Loading YOLOv5 model...");
-      yoloModel = await pipeline("object-detection", yoloConfig.modelPath);
+      
+      // If using a GitHub URL, you'll need to load the model slightly differently
+      // For Hugging Face model IDs, use pipeline as shown
+      // For direct URLs to ONNX files, you can use the 'local' option with the URL
+      if (yoloConfig.modelPath.startsWith('http')) {
+        // Loading from direct URL
+        yoloModel = await pipeline("object-detection", {
+          model: yoloConfig.modelPath,
+          local: true
+        });
+      } else {
+        // Loading from Hugging Face model ID
+        yoloModel = await pipeline("object-detection", yoloConfig.modelPath);
+      }
+      
       console.log("YOLOv5 model loaded successfully");
     }
     return yoloModel;
@@ -58,7 +72,19 @@ export const loadAudioModel = async () => {
   try {
     if (!audioModel) {
       console.log("Loading audio classification model...");
-      audioModel = await pipeline("audio-classification", audioConfig.modelPath);
+      
+      // Similar to YOLO model loading, handle both model IDs and direct URLs
+      if (audioConfig.modelPath.startsWith('http')) {
+        // Loading from direct URL
+        audioModel = await pipeline("audio-classification", {
+          model: audioConfig.modelPath,
+          local: true
+        });
+      } else {
+        // Loading from Hugging Face model ID
+        audioModel = await pipeline("audio-classification", audioConfig.modelPath);
+      }
+      
       console.log("Audio model loaded successfully");
     }
     return audioModel;
