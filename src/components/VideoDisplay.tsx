@@ -12,11 +12,10 @@ interface VideoDisplayProps {
 const VideoDisplay = ({ lane, isActive, hasEmergency }: VideoDisplayProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   
-  // Change these URLs to your GitHub raw video file URLs
-  // Example: https://raw.githubusercontent.com/yourusername/yourrepo/main/videos/lane1.mp4
+  // Update to use the GitHub raw video URLs
   const videoSources = {
-    lane1: "/videos/lane1-traffic.mp4", // Replace with your GitHub URL
-    lane2: "/videos/lane2-traffic.mp4", // Replace with your GitHub URL
+    lane1: "https://raw.githubusercontent.com/nandana1311/sonic-traffic-switch/main/lane1.mp4",
+    lane2: "https://raw.githubusercontent.com/nandana1311/sonic-traffic-switch/main/lane2.mp4",
   };
   
   // Load and play video when component mounts

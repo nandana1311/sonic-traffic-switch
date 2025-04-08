@@ -1,4 +1,3 @@
-
 import { pipeline, env } from "@huggingface/transformers";
 import { VehicleData } from "@/types/traffic";
 
@@ -15,19 +14,17 @@ export interface ModelConfig {
 }
 
 // YOLOv5 model configuration
-// Replace this URL with your GitHub raw model file URL
-// Example: https://raw.githubusercontent.com/yourusername/yourrepo/main/models/yolov5s.onnx
 export const yoloConfig: ModelConfig = {
-  modelPath: "onnx-community/yolov5s", // Replace with your GitHub URL
+  // Use the raw URL to your GitHub model file
+  modelPath: "https://raw.githubusercontent.com/nandana1311/sonic-traffic-switch/main/yolov8s.pt",
   inputShape: [1, 3, 640, 640],
   threshold: 0.5,
 };
 
 // Audio classification model configuration
-// Replace this URL with your GitHub raw model file URL
-// Example: https://raw.githubusercontent.com/yourusername/yourrepo/main/models/audio-model.onnx
 export const audioConfig: ModelConfig = {
-  modelPath: "onnx-community/audio-classification", // Replace with your GitHub URL
+  // Use the raw URL to your GitHub model file
+  modelPath: "https://raw.githubusercontent.com/nandana1311/sonic-traffic-switch/main/sound_classification_model.h5",
   inputShape: [1, 1, 44100], // 1 second of audio at 44.1kHz
   threshold: 0.7,
 };
@@ -37,21 +34,15 @@ let yoloModel: any = null;
 let audioModel: any = null;
 
 // Load the YOLOv5 model
-// You can manually call this function to preload the model at startup
 export const loadYoloModel = async () => {
   try {
     if (!yoloModel) {
       console.log("Loading YOLOv5 model...");
       
-      // If using a GitHub URL, you'll need to load the model slightly differently
-      // For Hugging Face model IDs, use pipeline as shown
-      // For direct URLs to ONNX files, you can use the 'local' option with the URL
+      // Fix the error by using the correct pipeline parameter format
       if (yoloConfig.modelPath.startsWith('http')) {
-        // Loading from direct URL
-        yoloModel = await pipeline("object-detection", {
-          model: yoloConfig.modelPath,
-          local: true
-        });
+        // Loading from direct URL - use a string for the model parameter
+        yoloModel = await pipeline("object-detection", yoloConfig.modelPath);
       } else {
         // Loading from Hugging Face model ID
         yoloModel = await pipeline("object-detection", yoloConfig.modelPath);
@@ -67,19 +58,15 @@ export const loadYoloModel = async () => {
 };
 
 // Load the audio classification model
-// You can manually call this function to preload the model at startup
 export const loadAudioModel = async () => {
   try {
     if (!audioModel) {
       console.log("Loading audio classification model...");
       
-      // Similar to YOLO model loading, handle both model IDs and direct URLs
+      // Fix the error by using the correct pipeline parameter format
       if (audioConfig.modelPath.startsWith('http')) {
-        // Loading from direct URL
-        audioModel = await pipeline("audio-classification", {
-          model: audioConfig.modelPath,
-          local: true
-        });
+        // Loading from direct URL - use a string for the model parameter
+        audioModel = await pipeline("audio-classification", audioConfig.modelPath);
       } else {
         // Loading from Hugging Face model ID
         audioModel = await pipeline("audio-classification", audioConfig.modelPath);
